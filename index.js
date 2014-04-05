@@ -1,19 +1,17 @@
-
 var express = require("express");
-var fs = require("graceful-fs");
-var path = require("path");
-var Q = require("q");
+var fs      = require("graceful-fs");
+var path    = require("path");
+var Q       = require("q");
 Q.longStackSupport = true;
-var http = require("http");
-var xtend = require("xtend");
-var config = require("./config");
+var http     = require("http");
+var xtend    = require("xtend");
+var config   = require("./config");
 var filesize = require("filesize");
-
 var writeFile = Q.denodeify(fs.writeFile);
-var readFile = Q.denodeify(fs.readFile);
-var readdir = Q.denodeify(fs.readdir);
-var unlink = Q.denodeify(fs.unlink);
-var stat = Q.denodeify(fs.stat);
+var readFile  = Q.denodeify(fs.readFile);
+var readdir   = Q.denodeify(fs.readdir);
+var unlink    = Q.denodeify(fs.unlink);
+var stat      = Q.denodeify(fs.stat);
 
 
 var app = express();
@@ -62,17 +60,15 @@ app.get("/", function(req, res, next) {
         }, 0);
 
         res.render("index", {
-            cacheDir: config.directory,
-            total: filesize(total),
-            files: files.map(function(file) {
+            cacheDir : config.directory,
+            total    : filesize(total),
+            files    : files.map(function(file) {
                 file.humanSize = filesize(file.size);
                 file.timestamp = new Date(file.created).getTime();
                 return file;
             })
         });
     }, next);
-
-
 });
 
 app.get("/client.js", function(req, res) {
@@ -90,12 +86,10 @@ app.get("/req/:sha1", function(req, res, next) {
 
 app.delete("/req/:sha1", function(req, res, next) {
     var filePath = path.join(config.directory, req.params.sha1);
-
     console.log("Deleting", filePath);
     Q.all([unlink(filePath), unlink(filePath + ".json")]).then(function() {
         res.json({ deleted: filePath });
     }, next);
-
 });
 
 app.post("/deleteall", function(req, res, next) {
@@ -107,8 +101,6 @@ app.post("/deleteall", function(req, res, next) {
         res.redirect("/");
     }, next);
 });
-
-
 
 var server = http.createServer(app);
 server.listen(Number(config.port), function() {

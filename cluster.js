@@ -1,6 +1,5 @@
 var cluster = require("cluster");
-var config = require("./config");
-
+var config  = require("./config");
 
 if (cluster.isMaster) {
     console.log("CONFIG", config);

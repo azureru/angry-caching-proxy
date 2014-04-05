@@ -1,17 +1,17 @@
-var pkg = require("./package.json");
-var request = require("request");
-var crypto = require("crypto");
-var Q = require("q");
-var path = require("path");
-var url = require("url");
+var pkg         = require("./package.json");
+var request     = require("request");
+var crypto      = require("crypto");
+var Q           = require("q");
+var path        = require("path");
+var url         = require("url");
 var promisePipe = require("promisepipe");
-var fs = require("fs");
-var filed = require("filed");
-var path = require("path");
+var fs          = require("fs");
+var filed       = require("filed");
+var path        = require("path");
 
-var stat = Q.denodeify(fs.stat);
+var stat      = Q.denodeify(fs.stat);
 var writeFile = Q.denodeify(fs.writeFile);
-var rename = Q.denodeify(fs.rename);
+var rename    = Q.denodeify(fs.rename);
 
 function promiseFromStream(stream) {
     return Q.promise(function(resolve, reject) {
@@ -40,12 +40,12 @@ module.exports = function(triggerFns, cacheDir) {
         return writeFile(
             toCachePath(origReq) + ".json",
             JSON.stringify({
-                sha1: toCacheKey(origReq),
-                method: origReq.method,
-                url: origReq.url,
-                created: new Date(),
-                responseHeaders: clientRes.headers,
-                requestHeaders: origReq.headers
+                sha1            : toCacheKey(origReq),
+                method          : origReq.method,
+                url             : origReq.url,
+                created         : new Date(),
+                responseHeaders : clientRes.headers,
+                requestHeaders  : origReq.headers
             }, null, "    ")
       );
     }
@@ -54,10 +54,10 @@ module.exports = function(triggerFns, cacheDir) {
         console.log("Cache miss", req.method, req.url);
         res.setHeader("X-Cache", "Miss " + toCacheKey(req));
 
-        var target = toCachePath(req);
+        var target     = toCachePath(req);
         var tempTarget = target + "." + Math.random().toString(36).substring(7) +".tmp";
 
-        var s = Date.now();
+        var s             = Date.now();
         var clientRequest = request(req.url, { pool: {}});
 
         var cacheWrite = Q.promise(function(resolve, reject) {
@@ -87,7 +87,6 @@ module.exports = function(triggerFns, cacheDir) {
 
         });
 
-
         var cachePromise = Q.all([
             cacheWrite,
             promiseFromStream(clientRequest),
@@ -104,11 +103,9 @@ module.exports = function(triggerFns, cacheDir) {
         console.log("Cache hit for", req.method, req.url, toCacheKey(req));
         res.setHeader("X-Cache", "Hit " + toCacheKey(req));
 
-
         res.sendfile(toCachePath(req));
         return promiseFromStream(res);
     }
-
 
     function cacheResponse(req, res) {
 
@@ -119,10 +116,8 @@ module.exports = function(triggerFns, cacheDir) {
         });
     }
 
-
-
     return function angryCachingProxy(req, res, next) {
-
+        console.log(req);
         var u = url.parse(req.url);
         if (!u.host) {
             return next();
@@ -136,10 +131,13 @@ module.exports = function(triggerFns, cacheDir) {
             return next(new Error(msg));
         }
 
+        console.log(req.method);
+
         if (req.method === "GET") {
             var useCache = triggerFns.some(function(trigger) {
                 return trigger(req, res);
             });
+            console.log(useCache);
             if (useCache) {
                 cacheResponse(req, res).fail(function(err) {
                     console.log("Cache FAIL", req.method, req.url, err);
