@@ -13,6 +13,8 @@ var stat      = Q.denodeify(fs.stat);
 var writeFile = Q.denodeify(fs.writeFile);
 var rename    = Q.denodeify(fs.rename);
 
+var cookieJar = request.jar();
+
 function promiseFromStream(stream) {
     return Q.promise(function(resolve, reject) {
         stream.on("error", reject);
@@ -27,8 +29,6 @@ function toCacheKey(req) {
     h.update(req.url);
     return h.digest("hex");
 }
-
-
 
 module.exports = function(triggerFns, cacheDir) {
 
@@ -58,7 +58,10 @@ module.exports = function(triggerFns, cacheDir) {
         var tempTarget = target + "." + Math.random().toString(36).substring(7) +".tmp";
 
         var s             = Date.now();
-        var clientRequest = request(req.url, { pool: {}});
+        var clientRequest = request({
+            url: req.url,
+            headers: req.headers
+        });
 
         var cacheWrite = Q.promise(function(resolve, reject) {
             clientRequest.on("error", reject);
@@ -117,7 +120,6 @@ module.exports = function(triggerFns, cacheDir) {
     }
 
     return function angryCachingProxy(req, res, next) {
-        console.log(req);
         var u = url.parse(req.url);
         if (!u.host) {
             return next();
@@ -130,8 +132,6 @@ module.exports = function(triggerFns, cacheDir) {
             console.log(msg);
             return next(new Error(msg));
         }
-
-        console.log(req.method);
 
         if (req.method === "GET") {
             var useCache = triggerFns.some(function(trigger) {
@@ -146,7 +146,7 @@ module.exports = function(triggerFns, cacheDir) {
             }
         }
 
-        console.log("Proxying", req.method, req.url);
+        console.log("Proxying ==> ", req.method, req.url);
         promisePipe(
             req,
             request({
