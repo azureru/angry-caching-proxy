@@ -39,24 +39,49 @@
         </style>
     </head>
     <body>
-        <a href="https://github.com/epeli/angry-caching-proxy"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a>
-      <h1>Angry Caching Proxy</h1>
+      <h1>Extra Angry Caching Proxy</h1>
 
-      <p>There are {{files/length}} cached requests stored in</p>
-
-      <pre>
-      {{cacheDir}}
-      </pre>
-
+      <h3>Summary</h3>
       <p>
-          Using {{total}} of disk space.
+
+      There are {{files/length}} cached requests stored in
+
+      <code>`{{cacheDir}}`</code>
+      
+      using <code>`{{total}}`</code> of disk space. 
+
+      These files are cached forever (until removed manually)
+
+      Feel free to use this proxy for all non-HTTPS request
+      </p>
+
+      <h3>Installed Cache Filters</h3>
+      <table width="100%">
+          <thead>
+          <tr>
+              <th></th>
+              <th>Filter</th>
+          </tr>
+          </thead>
+
+          <tbody class="list">
+          {{#each filters}}
+            <tr class="url-row">
+                <td></td>
+                <td>{{this}}</td>
+            </tr>
+          {{/each}}
+          </tbody>
+      </table>      
+
+
+      <h3>Cached Files</h3>
+      <div id="cached-reqs">
+
           <form action="/deleteall" method="post" accept-charset="utf-8">
               <p><input type="submit" value="clear all"></p>
           </form>
-      </p>
 
-
-      <div id="cached-reqs">
       <input type="text" class="search" placeholder="Search" autofocus >
 
       <table width="100%">
@@ -64,10 +89,10 @@
           <tr>
               <th></th>
               <th></th>
-              <th class="sort" data-sort="size">bytes</th>
-              <th class="sort" data-sort="url">cached url</th>
-              <th class="sort" data-sort="timestamp">created</th>
-              <th>sha1</th>
+              <th class="sort" data-sort="size">Bytes</th>
+              <th class="sort" data-sort="url">Url</th>
+              <th class="sort" data-sort="timestamp">Created</th>
+              <th>Sha1</th>
           </tr>
           </thead>
 

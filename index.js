@@ -60,6 +60,7 @@ app.get("/", function(req, res, next) {
         }, 0);
 
         res.render("index", {
+            filters  : config.triggers,
             cacheDir : config.directory,
             total    : filesize(total),
             files    : files.map(function(file) {
