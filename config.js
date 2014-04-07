@@ -3,7 +3,7 @@ var xtend    = require("xtend");
 var os       = require("os");
 
 var config = {
-    directory      : process.cwd() + "/angry-caching-proxy",
+    directory      : process.cwd() + "/cache",
     customTriggers : process.cwd() + "/triggers.js",
     port           : 8080,
     workers        : os.cpus().length,
@@ -17,8 +17,10 @@ var config = {
 
 try {
     config = xtend(config, require(process.cwd()+ "/config.json"));
+    console.log(config);
 } catch(err) {
     // do noth
+    console.log("Error Loading Config", err);
 }
 
 var args = optimist

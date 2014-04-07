@@ -1,0 +1,13 @@
+{
+  "directory": "cache",
+  "port" : 9090,
+  "workers" : 2,
+  "triggers" : [
+  	"apt-get", 
+  	"npm", 
+  	"pypi", 
+  	"rubygems", 
+  	"mata2sites", 
+  	"ismayaApi"
+  ]
+}

@@ -50,6 +50,17 @@ module.exports = function(triggerFns, cacheDir) {
       );
     }
 
+    function applyMeta(req, res, metaCallback) {
+        fs.readFile(toCachePath(req)+".json", 'utf8', function (err, data) {
+            if (err) {
+                console.log('Error: ' + err);
+                return;
+            }        
+            data = JSON.parse(data);         
+            metaCallback(null, data);
+        });        
+    }
+
     function createCache(req, res) {
         console.log("Cache miss", req.method, req.url);
         res.setHeader("X-Cache", "Miss " + toCacheKey(req));
@@ -106,8 +117,15 @@ module.exports = function(triggerFns, cacheDir) {
         console.log("Cache hit for", req.method, req.url, toCacheKey(req));
         res.setHeader("X-Cache", "Hit " + toCacheKey(req));
 
-        res.sendfile(toCachePath(req));
-        return promiseFromStream(res);
+        // apply saved meta JSON to the response
+        applyMeta(req,res, function (err, data) {
+            for (var key in data.responseHeaders) {
+                res.setHeader(key, data.responseHeaders[key]);
+            }
+
+            res.sendfile(toCachePath(req));
+            return promiseFromStream(res);            
+        });
     }
 
     function cacheResponse(req, res) {

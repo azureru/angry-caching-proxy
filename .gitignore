@@ -1,4 +1,5 @@
 node_modules/
+cache/
 config.json
 triggers.js
 !.gitignore

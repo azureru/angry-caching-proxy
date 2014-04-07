@@ -1,7 +1,6 @@
 /*global List*/
 (function() {
 
-
     [].forEach.call(document.querySelectorAll(".url-row"), function(row) {
         var button = row.querySelector(".delete");
         button.addEventListener("click", function(e) {
@@ -18,14 +17,9 @@
                 }
                 row.className += " deleted";
             };
-
             req.open("DELETE", "/req/" + sha1, true);
             req.send();
-
         }, false);
-
-
-
     });
 
     new List("cached-reqs", {
