@@ -55,10 +55,10 @@ module.exports = function(triggerFns, cacheDir) {
             if (err) {
                 console.log('Error: ' + err);
                 return;
-            }        
-            data = JSON.parse(data);         
+            }
+            data = JSON.parse(data);
             metaCallback(null, data);
-        });        
+        });
     }
 
     function createCache(req, res) {
@@ -124,7 +124,7 @@ module.exports = function(triggerFns, cacheDir) {
             }
 
             res.sendfile(toCachePath(req));
-            return promiseFromStream(res);            
+            return promiseFromStream(res);
         });
     }
 
@@ -155,12 +155,18 @@ module.exports = function(triggerFns, cacheDir) {
             var useCache = triggerFns.some(function(trigger) {
                 return trigger(req, res);
             });
-            console.log(useCache);
-            if (useCache) {
+            if (useCache === true) {
                 cacheResponse(req, res).fail(function(err) {
                     console.log("Cache FAIL", req.method, req.url, err);
                 });
                 return;
+            } else if (useCache === 404) {
+                // the trigger FN can return 404 integer to reject access ;)
+                // e.g. blocking ad
+                res.status(404).send('Not found');
+            } else {
+                // not true, not 404 it's a redirect to somewhere
+                req.url = useCache;
             }
         }
 
@@ -178,11 +184,9 @@ module.exports = function(triggerFns, cacheDir) {
             console.error("Proxying failed:", err.message, req.method, req.url);
             res.write("Angry Caching Proxy - Upstream failed: " + err.message);
             res.end("\n", 500);
-
             // Ensure that this connection gets closed
             req.setTimeout(100);
         });
-
     };
 };
 
